@@ -5,18 +5,18 @@ Yue Shi, Ph.D candidate, University of Washington
 
 -   [Maximum Likelihood Estimation (MLE)](#maximum-likelihood-estimation-mle)
     -   [Example: Halitosis example](#example-halitosis-example)
-    -   [Example: model selection based on maximum likelihood](#example-model-selection-based-on-maximum-likelihood)
--   [Maximum a Posteriori (MAP) Estimation](#maximum-a-posteriori-map-estimation)
+    -   [Example: Model selection based on maximum likelihood](#example-model-selection-based-on-maximum-likelihood)
+-   [Maximum a Posteriori Estimation (MAP)](#maximum-a-posteriori-estimation-map)
     -   [beta distribution](#beta-distribution)
     -   [Example:Thumbtack example (unfair coin)](#examplethumbtack-example-unfair-coin)
 -   [Ordinary Linear Regression](#ordinary-linear-regression)
-    -   [Simulation example](#simulation-example)
-    -   [Example: quantitative trait loci analysis for cholesterol levels](#example-quantitative-trait-loci-analysis-for-cholesterol-levels)
+    -   [Example: Simulation data](#example-simulation-data)
+    -   [Example: Quantitative trait loci analysis for cholesterol levels](#example-quantitative-trait-loci-analysis-for-cholesterol-levels)
 -   [Model selection and cross validation](#model-selection-and-cross-validation)
     -   [Ridge regression or L2 regularized linear regression](#ridge-regression-or-l2-regularized-linear-regression)
     -   [LASSO regression or L1 regularized linear regression](#lasso-regression-or-l1-regularized-linear-regression)
     -   [LOOCV (leave one out cross validation)](#loocv-leave-one-out-cross-validation)
-    -   [Simulation study](#simulation-study)
+    -   [Example: Simulation data](#example-simulation-data-1)
     -   [Example: Insulin](#example-insulin)
     -   [Example: Cholesterol](#example-cholesterol)
 
@@ -69,7 +69,7 @@ abline(v=mle,col="red")
 
 ![](estimation_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
-#### Example: model selection based on maximum likelihood
+#### Example: Model selection based on maximum likelihood
 
 we will implement an algorithm for selecting among various structures of the regulatory network. Specifically, we will focus on two possible models of the galactose regulatory network in S. cerevisiae. We will select a model based on the expression data on these three genes measured across S. cerevisiae individuals.
 
@@ -81,49 +81,90 @@ Likelihood function of Model 1:
 
 ``` r
 a <- read.table(header = T, file="https://sites.google.com/a/cs.washington.edu/genome560-spr18/disc-gal80-gal4-gal2.txt") 
-head(a)
+names=a[,1]
+a=a[,-1]
+rownames(a)=names
+dim(a) ## 3 genes, 112 samples
 ```
 
-    ##     EXP X1 X2 X3 X4 X5 X6 X7 X8 X9 X10 X11 X12 X13 X14 X15 X16 X17 X18 X19
-    ## 1 Gal80  1  1  1  0  1  0  0  0  0   0   0   1   0   0   1   0   0   0   1
-    ## 2  Gal4  1  0  0  1  1  1  1  1  1   1   1   0   1   0   0   0   1   1   0
-    ## 3  Gal2  1  1  1  1  1  1  1  1  1   1   1   1   1   0   0   0   1   0   0
-    ##   X20 X21 X22 X23 X24 X25 X26 X27 X28 X29 X30 X31 X32 X33 X34 X35 X36 X37
-    ## 1   0   1   0   0   0   1   0   1   1   1   0   0   0   0   0   0   1   0
-    ## 2   1   1   1   1   1   0   0   1   0   0   1   1   1   0   1   1   0   0
-    ## 3   1   1   1   1   1   1   1   0   0   0   0   0   1   1   1   1   0   0
-    ##   X38 X39 X40 X41 X42 X43 X44 X45 X46 X47 X48 X49 X50 X51 X52 X53 X54 X55
-    ## 1   0   1   0   0   0   0   0   0   0   1   0   1   1   1   1   1   0   1
-    ## 2   1   0   1   1   0   1   1   1   1   0   1   0   0   0   1   0   0   1
-    ## 3   1   1   1   1   0   1   1   1   1   0   0   0   0   0   0   0   0   1
-    ##   X56 X57 X58 X59 X60 X61 X62 X63 X64 X65 X66 X67 X68 X69 X70 X71 X72 X73
-    ## 1   0   0   0   0   0   1   1   0   0   0   1   1   0   1   1   0   1   1
-    ## 2   1   1   0   1   0   0   1   1   1   0   1   0   0   0   1   0   0   1
-    ## 3   1   1   1   1   0   1   1   0   1   0   0   0   1   0   0   1   0   1
-    ##   X74 X75 X76 X77 X78 X79 X80 X81 X82 X83 X84 X85 X86 X87 X88 X89 X90 X91
-    ## 1   1   1   1   1   0   0   1   0   1   1   0   1   1   0   1   0   0   1
-    ## 2   1   0   0   0   1   1   0   0   0   1   1   0   0   0   1   1   1   1
-    ## 3   1   0   1   0   0   1   0   0   0   0   0   0   1   0   0   1   1   0
-    ##   X92 X93 X94 X95 X96 X97 X98 X99 X100 X101 X102 X103 X104 X105 X106 X107
-    ## 1   1   1   0   0   1   1   1   1    1    0    0    1    1    1    1    0
-    ## 2   1   1   0   1   0   0   0   1    1    0    1    0    0    0    0    1
-    ## 3   1   0   0   1   1   0   1   0    1    0    0    0    0    1    1    1
-    ##   X108 X109 X110 X111 X112
-    ## 1    1    1    0    0    1
-    ## 2    0    0    0    0    0
-    ## 3    0    1    0    1    1
+    ## [1]   3 112
 
 ``` r
-dim(a)
+a=t(a)
 ```
 
-    ## [1]   3 113
+Remember: MLE solution is the same as the sample mean. We can calculate each component of the likelihood function from the data, and compare the log likelihood for Model 1 and Model 2.
+
+Calculate *P*(*G**a**l*80) (the probablity of Gal 80 has high expression level) and *P*(*G**a**l*4) (the probablity of Gal 4 has high expression level).
 
 ``` r
-a=as.data.frame(a)
+p.80=sum(a[,1])/nrow(a)
+p.4=sum(a[,2])/nrow(a)
 ```
 
-Maximum a Posteriori (MAP) Estimation
+Calculate *P*(*G**a**l*4|*G**a**l*80), *P*(*G**a**l*2|*G**a**l*4) and *P*(*G**a**l*2|*G**a**l*4, *G**a**l*80)
+
+``` r
+p.4H80H=sum(a[,1]==1 & a[,2]==1)/sum(a[,1])
+p.4L80H=sum(a[,1]==1 & a[,2]==0)/sum(a[,1])
+p.4H80L=sum(a[,1]==0 & a[,2]==1)/(nrow(a)-sum(a[,1]))
+p.4L80L=sum(a[,1]==0 & a[,2]==0)/(nrow(a)-sum(a[,1]))
+
+
+p.2H4H=sum(a[,2]==1 & a[,3]==1)/sum(a[,2])
+p.2L4H=sum(a[,2]==1 & a[,3]==0)/sum(a[,2])
+p.2H4L=sum(a[,2]==0 & a[,3]==1)/(nrow(a)-sum(a[,2]))
+p.2L4L=sum(a[,2]==0 & a[,3]==0)/(nrow(a)-sum(a[,2]))
+
+p.2H80H4H=sum(a[,1]==1 & a[,2]==1 & a[,3]==1)/sum(a[,1]==1 & a[,2]==1)
+p.2L80H4H=sum(a[,1]==1 & a[,2]==1 & a[,3]==0)/sum(a[,1]==1 & a[,2]==1)
+p.2H80H4L=sum(a[,1]==1 & a[,2]==0 & a[,3]==1)/sum(a[,1]==1 & a[,2]==0)
+p.2L80H4L=sum(a[,1]==1 & a[,2]==0 & a[,3]==0)/sum(a[,1]==1 & a[,2]==0)
+p.2H80L4H=sum(a[,1]==0 & a[,2]==1 & a[,3]==1)/sum(a[,1]==0 & a[,2]==1)
+p.2L80L4H=sum(a[,1]==0 & a[,2]==1 & a[,3]==0)/sum(a[,1]==0 & a[,2]==1)
+p.2H80L4L=sum(a[,1]==0 & a[,2]==0 & a[,3]==1)/sum(a[,1]==0 & a[,2]==0)
+p.2L80L4L=sum(a[,1]==0 & a[,2]==0 & a[,3]==0)/sum(a[,1]==0 & a[,2]==0)
+```
+
+``` r
+LL.m1=sum(a[,1])*log(p.80)+
+(nrow(a)-sum(a[,1]))*(1-log(p.80))+
+sum(a[,1]==1 & a[,2]==1)*log(p.4H80H)+
+sum(a[,1]==1 & a[,2]==0)*log(p.4L80H)+
+sum(a[,1]==0 & a[,2]==1)*log(p.4H80L)+
+sum(a[,1]==0 & a[,2]==0)*log(p.4L80L)+
+sum(a[,2]==1 & a[,3]==1)*log(p.2H4H)+
+sum(a[,2]==1 & a[,3]==0)*log(p.2L4H)+
+sum(a[,2]==0 & a[,3]==1)*log(p.2H4L)+
+sum(a[,2]==0 & a[,3]==0)*log(p.2L4L)
+
+LL.m2=sum(a[,1])*log(p.80)+
+(nrow(a)-sum(a[,1]))*(1-log(p.80))+
+sum(a[,2])*log(p.4)+
+(nrow(a)-sum(a[,2]))*(1-log(p.4))+
+sum(a[,1]==1 & a[,2]==1 & a[,3]==1)*log(p.2H80H4H)+
+sum(a[,1]==1 & a[,2]==1 & a[,3]==0)*log(p.2L80H4H)+
+sum(a[,1]==1 & a[,2]==0 & a[,3]==1)*log(p.2H80H4L)+
+sum(a[,1]==1 & a[,2]==0 & a[,3]==0)*log(p.2L80H4L)+
+sum(a[,1]==0 & a[,2]==1 & a[,3]==1)*log(p.2H80L4H)+
+sum(a[,1]==0 & a[,2]==1 & a[,3]==0)*log(p.2L80L4H)+
+sum(a[,1]==0 & a[,2]==0 & a[,3]==1)*log(p.2H80L4L)+
+sum(a[,1]==0 & a[,2]==0 & a[,3]==0)*log(p.2L80L4L)
+
+LL.m1
+```
+
+    ## [1] -80.05638
+
+``` r
+LL.m2
+```
+
+    ## [1] 44.27889
+
+Since *L*(*M**o**d**e**l*2 : *D**a**t**a*) is greater than *L*(*M**o**d**e**l*1 : *D**a**t**a*), therefore Model 2 is favored over Model 1.
+
+Maximum a Posteriori Estimation (MAP)
 -------------------------------------
 
 Posterior probability is:
@@ -188,7 +229,7 @@ plot(LL~p, ylab="Likelihood",main="Likelihood")
 plot(LP~p, ylab="Likelihood",main="Posterior (alpha=1000, beta=1000)")
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ``` r
 LL.max=p[which.max(LL)]
@@ -228,7 +269,7 @@ plot(LL~p, ylab="Likelihood",main="Likelihood")
 plot(LP~p, ylab="Likelihood",main="Posterior (alpha=30, beta=30)")
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ``` r
 LL.max=p[which.max(LL)]
@@ -269,7 +310,7 @@ $$
 $\\hat{y\_{i}}$ is the fitted value for observation i.
 F-statistic is a measure of goodness of fit with associated p value for the model.
 
-#### Simulation example
+#### Example: Simulation data
 
 ``` r
 X1=rnorm(100,mean=10, sd=5)
@@ -285,15 +326,15 @@ rr=lsfit(X,Y)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=2.7104
-    ## R-Square=0.2968
-    ## F-statistic (df=2, 97)=20.4701
+    ## Residual Standard Error=2.6967
+    ## R-Square=0.3078
+    ## F-statistic (df=2, 97)=21.5651
     ## p-value=0
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   1.1104  0.6962  1.5948   0.1140
-    ## X1          0.0649  0.0624  1.0405   0.3007
-    ## X2          0.4240  0.0664  6.3833   0.0000
+    ## Intercept   0.0864  0.6895  0.1253   0.9006
+    ## X1          0.1027  0.0588  1.7479   0.0836
+    ## X2          0.3767  0.0594  6.3454   0.0000
 
 ``` r
 ## quadratic regression
@@ -304,15 +345,15 @@ rr=lsfit(X,Y2)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=2.5857
-    ## R-Square=0.9924
-    ## F-statistic (df=2, 97)=6354.503
+    ## Residual Standard Error=3.0624
+    ## R-Square=0.9908
+    ## F-statistic (df=2, 97)=5202.706
     ## p-value=0
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   0.4274  1.0400  0.4110   0.6820
-    ## X1          0.0956  0.1984  0.4821   0.6308
-    ## X3          0.2971  0.0092 32.4603   0.0000
+    ## Intercept   2.9980  1.0986  2.7290   0.0075
+    ## X1         -0.3681  0.1967 -1.8713   0.0643
+    ## X3          0.3181  0.0087 36.3679   0.0000
 
 Method 2: lm function in R (you don't need to combine X1 and X2)
 
@@ -327,125 +368,125 @@ summary(fit)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -7.5524 -2.0715 -0.2669  1.7833  6.3085 
+    ## -6.7393 -1.5400 -0.1868  1.5868  6.6911 
     ## 
     ## Coefficients:
     ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)  1.11038    0.69623   1.595    0.114    
-    ## X1           0.06493    0.06240   1.040    0.301    
-    ## X2           0.42402    0.06643   6.383 5.96e-09 ***
+    ## (Intercept)  0.08638    0.68950   0.125   0.9006    
+    ## X1           0.10274    0.05878   1.748   0.0836 .  
+    ## X2           0.37673    0.05937   6.345 7.09e-09 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2.71 on 97 degrees of freedom
-    ## Multiple R-squared:  0.2968, Adjusted R-squared:  0.2823 
-    ## F-statistic: 20.47 on 2 and 97 DF,  p-value: 3.832e-08
+    ## Residual standard error: 2.697 on 97 degrees of freedom
+    ## Multiple R-squared:  0.3078, Adjusted R-squared:  0.2935 
+    ## F-statistic: 21.57 on 2 and 97 DF,  p-value: 1.785e-08
 
 ``` r
 rr=lsfit(X,Y)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=3.2281
-    ## R-Square=0.0026
-    ## F-statistic (df=2, 97)=0.1243
-    ## p-value=0.8833
+    ## Residual Standard Error=3.2013
+    ## R-Square=0.0245
+    ## F-statistic (df=2, 97)=1.2172
+    ## p-value=0.3005
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   0.7820  1.2984  0.6022   0.5484
-    ## X1          0.0527  0.2477  0.2126   0.8321
-    ## X3         -0.0038  0.0114 -0.3351   0.7383
+    ## Intercept  -1.5142  1.1485 -1.3185   0.1904
+    ## X1          0.2219  0.2056  1.0790   0.2832
+    ## X3         -0.0058  0.0091 -0.6326   0.5285
 
 ``` r
 fit$coefficients
 ```
 
     ## (Intercept)          X1          X2 
-    ##  1.11038061  0.06492612  0.42402272
+    ##  0.08638082  0.10273825  0.37672948
 
 ``` r
 fit$fitted.values
 ```
 
     ##            1            2            3            4            5 
-    ##  0.675939000 -1.218431892  0.630026561  2.637190290  1.665659875 
+    ## -0.754040710  0.852239797  0.059455013  1.286553989 -0.375907220 
     ##            6            7            8            9           10 
-    ## -0.660759198  2.219068374  0.865326162  1.372706891  1.557933969 
+    ##  0.356424336  0.063511603  1.129013061 -1.140687853 -0.511118728 
     ##           11           12           13           14           15 
-    ##  0.472073831  5.266000396  1.035851982 -0.602412758  1.702279136 
+    ## -0.402449377  3.968900166  0.965253152 -0.354707118  0.154780860 
     ##           16           17           18           19           20 
-    ##  4.731268342  1.353433380  0.863510252  1.337789747 -0.006479785 
+    ## -1.999824207  0.376737648  0.510347412 -0.065311979  1.712147897 
     ##           21           22           23           24           25 
-    ## -0.722341226 -1.749298996  2.369887159 -0.372951316  1.296716791 
+    ## -1.772492576 -2.115091558  1.242370215  0.762659736 -0.571674964 
     ##           26           27           28           29           30 
-    ## -0.779464667  0.282471433 -0.353433908  0.273445625 -0.756325353 
+    ##  1.529818157 -1.948452569  1.992508524 -3.382857996 -2.035764814 
     ##           31           32           33           34           35 
-    ##  0.897222364 -0.528437879 -1.346944795  2.030968300  2.503966491 
+    ## -1.804414178 -1.890056106  1.832969490  3.269942951 -0.425813310 
     ##           36           37           38           39           40 
-    ##  1.385708358 -2.204867385  0.201494544 -3.650773117  1.495890144 
+    ## -2.034588282  1.255799400  1.527681216  1.595798601 -0.598150057 
     ##           41           42           43           44           45 
-    ## -2.428036810 -0.077329110 -1.227960891  0.247436037  0.176046530 
+    ## -2.154553118  1.104945645 -2.904832576 -0.769896845 -2.873032100 
     ##           46           47           48           49           50 
-    ##  3.786718224  0.205028798  4.032430209 -0.246740548  1.052999484 
+    ## -0.190840640  1.557686150 -0.447395837 -1.161298991 -1.406109506 
     ##           51           52           53           54           55 
-    ##  0.230861249  2.861204914  3.087686041  1.667373882  0.634836596 
+    ##  3.041911990 -0.239968233  2.108762547  3.956558917  1.752702150 
     ##           56           57           58           59           60 
-    ##  0.520180673 -0.013389458 -0.359357935 -2.886798372  1.904823535 
+    ##  0.540612024  2.680690024 -2.321981453 -2.870361718 -2.312004199 
     ##           61           62           63           64           65 
-    ## -1.692195712 -0.892727392 -2.441439932 -0.037325462  3.902807962 
+    ##  1.477298102 -1.005901304  3.091157960 -1.555526721 -3.177614794 
     ##           66           67           68           69           70 
-    ##  0.997728468 -0.766240689  0.338084925  0.791105909  2.763943738 
+    ## -0.334208531 -4.162235670  1.717371130 -0.002983777 -0.495004091 
     ##           71           72           73           74           75 
-    ##  0.979640683  3.159115829  3.016844899  1.111728195  2.463801315 
+    ##  2.208840657 -2.278063811  0.534164311 -0.132887695 -1.270020715 
     ##           76           77           78           79           80 
-    ##  1.819822709  0.996404569  4.446262836  3.373110252 -0.780151474 
+    ##  0.772859702  2.842390033  0.919497035 -0.204067964  1.574898720 
     ##           81           82           83           84           85 
-    ##  1.636995263  3.633597443  2.583664913 -2.122656658  0.884929541 
+    ## -1.328422764 -0.942037909  0.558905683  0.927676137  0.637693575 
     ##           86           87           88           89           90 
-    ##  0.168248751  0.129256607  2.954204474  0.726279813 -0.242500076 
+    ##  0.668792582  1.820020782  0.342605380  1.503010395  3.129932642 
     ##           91           92           93           94           95 
-    ## -2.010474431  0.011159729  3.599128843  1.079299401  2.239993112 
+    ##  0.232452135 -1.762860682  2.973852927  1.063499601  0.440495772 
     ##           96           97           98           99          100 
-    ##  0.917166356  2.574870300  0.861092187 -0.168130373  1.131609614
+    ##  0.460890906 -1.639315743 -3.073406645 -2.974481076  1.731744015
 
 ``` r
 fit$residuals
 ```
 
     ##          1          2          3          4          5          6 
-    ## -0.1227163  2.2105757 -0.3668267 -2.0707059 -2.5771797  4.7762153 
+    ##  0.9068832  6.6911177  0.6171562 -3.4957205 -0.1730067  2.5308735 
     ##          7          8          9         10         11         12 
-    ##  1.1290842 -0.8611271 -2.3999196  1.5330244  1.2765874 -1.1861641 
+    ## -0.6609824  1.1694370 -3.6879147 -0.9994137  0.4250052 -2.1877276 
     ##         13         14         15         16         17         18 
-    ##  1.8968649  5.4782977  5.9334310  2.9929938  1.9372422 -2.0740660 
+    ##  2.4787566 -2.6239326  6.0186112  2.1491064  3.5396122 -1.0151518 
     ##         19         20         21         22         23         24 
-    ## -0.6654859  1.8814830  2.1009534  0.8830376  2.6886955  0.7472612 
+    ##  0.6107878  1.5608568 -1.7883827 -2.8992153  1.9864484  1.6646519 
     ##         25         26         27         28         29         30 
-    ## -4.1143561 -2.0302047 -0.1669608 -3.1223606 -1.1038898 -2.3915177 
+    ##  4.6019273  1.9450075 -3.3652972 -2.0789109 -0.3025080  2.1038441 
     ##         31         32         33         34         35         36 
-    ## -7.5524002 -2.2607620  0.7590359 -3.0208028  6.3085012  1.7291649 
+    ## -4.4919726  3.7837454 -0.2754491  1.9132797 -1.4234406 -1.5178726 
     ##         37         38         39         40         41         42 
-    ## -0.8885444 -1.9755237  0.7399349 -3.0360516 -0.8128978  3.7847215 
+    ## -1.0894095 -1.0510206 -0.8385669  2.9300713  0.2071389  2.0864957 
     ##         43         44         45         46         47         48 
-    ## -3.3627290  5.9891374  2.3219513 -3.0613489  0.8173157 -1.3899545 
+    ##  0.3268249 -0.4304703  2.4027358 -1.2395949 -0.9113377  1.2386378 
     ##         49         50         51         52         53         54 
-    ##  2.5002218  0.0739791 -2.8318932 -0.9127084 -2.1761638  3.9830984 
+    ## -2.3856852 -6.0825407  1.0031774  3.6341138  4.3301870  1.1018317 
     ##         55         56         57         58         59         60 
-    ## -1.1164758 -1.1274848  1.5536022 -1.7241155 -3.4627406 -1.1081483 
+    ## -3.0463013 -4.0775992 -4.2332713  1.2074113 -2.4050525  3.2267260 
     ##         61         62         63         64         65         66 
-    ## -0.6475314 -4.0991172  0.1625953  1.4425727 -1.3644095  2.1194403 
+    ## -4.1793871 -0.9605932  0.2880749  1.3143361 -0.9016654 -1.6063500 
     ##         67         68         69         70         71         72 
-    ##  0.8503586  1.3782278  1.6023139  0.9394864  1.9071155  4.8362930 
+    ## -5.8683010 -6.7393014 -1.2611233 -1.6332521  3.8204370  0.1726141 
     ##         73         74         75         76         77         78 
-    ## -3.8600115 -1.2167093 -3.0396970 -3.3928540  0.2617827 -0.5144449 
+    ## -0.8353533  4.3736969 -1.3348155  0.1127017  1.0425812  1.9175052 
     ##         79         80         81         82         83         84 
-    ## -3.6181306 -2.1783475  1.3472899  5.3773622 -1.1120397  1.9445107 
+    ## -2.8760678 -2.8420326  1.3121663  4.8776927 -3.4135833 -0.2074437 
     ##         85         86         87         88         89         90 
-    ## -2.2896053  1.4328731 -0.7674490  2.8694063 -2.4497877  0.8689489 
+    ##  1.2189353  1.5127400 -2.8876042 -0.2006822 -0.3640998 -0.7723966 
     ##         91         92         93         94         95         96 
-    ##  0.4164216  2.3252374  2.6945473  1.7505347 -1.4643661  5.0741099 
+    ##  1.8696075 -0.4030820 -0.6627004 -3.3817694  1.5040190  1.2382656 
     ##         97         98         99        100 
-    ## -2.5324201 -5.2717330 -1.6874814 -1.0474785
+    ## -1.1195507  0.9039698  6.4384634  0.9186376
 
 ``` r
 anova(fit)
@@ -455,9 +496,9 @@ anova(fit)
     ## 
     ## Response: Y
     ##           Df Sum Sq Mean Sq F value    Pr(>F)    
-    ## X1         1   1.42   1.420  0.1934    0.6611    
-    ## X2         1 299.34 299.344 40.7468 5.957e-09 ***
-    ## Residuals 97 712.60   7.346                      
+    ## X1         1  20.85  20.846  2.8666   0.09364 .  
+    ## X2         1 292.80 292.800 40.2635 7.092e-09 ***
+    ## Residuals 97 705.39   7.272                      
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -465,9 +506,9 @@ anova(fit)
 plot(fit$residuals~fit$fitted.values)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
-#### Example: quantitative trait loci analysis for cholesterol levels
+#### Example: Quantitative trait loci analysis for cholesterol levels
 
 We are given the genotype and phenotype data from 334 mouse individuals. The genotype data measure binary genotype values of 1333 genetic markers for each mouse, and the phenotype data measure the normalized blood cholesterol levels. Given these data, we want to find the quantitative trait loci (QTLs) that contribute to elevated cholesterol level.
 
@@ -548,7 +589,7 @@ max(r.sq)
 plot(r.sq)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ``` r
 lm.598=lm(Y~X[,598])
@@ -561,7 +602,7 @@ plot(Y~X[,847], main="Marker 847")
 abline(lm.847)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-9-2.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-12-2.png)
 
 It turns out Marker 847 has the minimum SSE, Marker 598 has the maximum SSE. It is confirmed by *R*<sup>2</sup>. Marker 847 has the maximum *R*<sup>2</sup>, whereas Marker 598 has the minimum *R*<sup>2</sup>.
 
@@ -594,7 +635,7 @@ f(\\beta\_0, \\beta\_1, \\cdot\\cdot\\cdot, \\beta\_p)=\\sum\_{i=1}^{n}\[y\_i-(\
 $$
  In order to get the true test error, you can use cross validation, which partition the data into K equally (or nearly equally) sized segments or folds. Then perform k iterations of training and validation such that each iteration a different fold of the data is held-out for validation while the remaining k-1 folds are used for learning. The true test erros if the average test error of the k-fold iterations. In data mining and machine learning, 10-fold cross-validation (k=10) is the most common. LOOCV is a special case of k-fold cross-validation where k equals the number of samples in the data. The accuracy estimate obtained using LOOCV is known to be almost unbiased. It is widely used when the available data are very rare.
 
-### Simulation study
+### Example: Simulation data
 
 ``` r
 ## Generate 3 variables (or features X1, X2, X3)
@@ -630,7 +671,7 @@ We want to find *λ* to give the smallest GCV. If you couldn't get a "well" curv
 plot(seq(0,20,1),ridge$GCV)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
 ``` r
 which.min(ridge$GCV)
@@ -669,7 +710,7 @@ colSums((ridge$coef)^2)
 plot(seq(0,20,1),colSums((ridge$coef)^2))
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-17-1.png)
 
 L2 regularization term decreases as lambda value increases.
 
@@ -686,14 +727,14 @@ all=cbind(X,Y)
 pairs(all) ## pairwise correlation
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 ``` r
 ridge_lm=lm.ridge(Y~X,lambda=seq(0,20,1))
 plot(seq(0,20,1),ridge_lm$GCV)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-16-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-19-1.png)
 
 ``` r
 which.min(ridge_lm$GCV)
