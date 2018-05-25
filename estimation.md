@@ -5,17 +5,20 @@ Yue Shi, Ph.D candidate, University of Washington
 
 -   [Maximum Likelihood Estimation (MLE)](#maximum-likelihood-estimation-mle)
     -   [Example: Halitosis example](#example-halitosis-example)
+    -   [Example: model selection based on maximum likelihood](#example-model-selection-based-on-maximum-likelihood)
 -   [Maximum a Posteriori (MAP) Estimation](#maximum-a-posteriori-map-estimation)
     -   [beta distribution](#beta-distribution)
     -   [Example:Thumbtack example (unfair coin)](#examplethumbtack-example-unfair-coin)
--   [Linear Regression](#linear-regression)
+-   [Ordinary Linear Regression](#ordinary-linear-regression)
     -   [Simulation example](#simulation-example)
+    -   [Example: quantitative trait loci analysis for cholesterol levels](#example-quantitative-trait-loci-analysis-for-cholesterol-levels)
 -   [Model selection and cross validation](#model-selection-and-cross-validation)
     -   [Ridge regression or L2 regularized linear regression](#ridge-regression-or-l2-regularized-linear-regression)
     -   [LASSO regression or L1 regularized linear regression](#lasso-regression-or-l1-regularized-linear-regression)
     -   [LOOCV (leave one out cross validation)](#loocv-leave-one-out-cross-validation)
     -   [Simulation study](#simulation-study)
-    -   [Insulin example](#insulin-example)
+    -   [Example: Insulin](#example-insulin)
+    -   [Example: Cholesterol](#example-cholesterol)
 
 Maximum Likelihood Estimation (MLE)
 -----------------------------------
@@ -65,6 +68,60 @@ abline(v=mle,col="red")
 ```
 
 ![](estimation_files/figure-markdown_github/unnamed-chunk-1-1.png)
+
+#### Example: model selection based on maximum likelihood
+
+we will implement an algorithm for selecting among various structures of the regulatory network. Specifically, we will focus on two possible models of the galactose regulatory network in S. cerevisiae. We will select a model based on the expression data on these three genes measured across S. cerevisiae individuals.
+
+Likelihood function of Model 1:
+*L*(*D*|*θ*)=*P*(*G**a**l*80)*P*(*G**a**l*4|*G**a**l*80)*P*(*G**a**l*2|*G**a**l*4)
+ Likelihood function of Model 2:
+*L*(*D*|*θ*)=*P*(*G**a**l*4)*P*(*G**a**l*80)*P*(*G**a**l*2|*G**a**l*4, *G**a**l*80)
+ Import the data
+
+``` r
+a <- read.table(header = T, file="https://sites.google.com/a/cs.washington.edu/genome560-spr18/disc-gal80-gal4-gal2.txt") 
+head(a)
+```
+
+    ##     EXP X1 X2 X3 X4 X5 X6 X7 X8 X9 X10 X11 X12 X13 X14 X15 X16 X17 X18 X19
+    ## 1 Gal80  1  1  1  0  1  0  0  0  0   0   0   1   0   0   1   0   0   0   1
+    ## 2  Gal4  1  0  0  1  1  1  1  1  1   1   1   0   1   0   0   0   1   1   0
+    ## 3  Gal2  1  1  1  1  1  1  1  1  1   1   1   1   1   0   0   0   1   0   0
+    ##   X20 X21 X22 X23 X24 X25 X26 X27 X28 X29 X30 X31 X32 X33 X34 X35 X36 X37
+    ## 1   0   1   0   0   0   1   0   1   1   1   0   0   0   0   0   0   1   0
+    ## 2   1   1   1   1   1   0   0   1   0   0   1   1   1   0   1   1   0   0
+    ## 3   1   1   1   1   1   1   1   0   0   0   0   0   1   1   1   1   0   0
+    ##   X38 X39 X40 X41 X42 X43 X44 X45 X46 X47 X48 X49 X50 X51 X52 X53 X54 X55
+    ## 1   0   1   0   0   0   0   0   0   0   1   0   1   1   1   1   1   0   1
+    ## 2   1   0   1   1   0   1   1   1   1   0   1   0   0   0   1   0   0   1
+    ## 3   1   1   1   1   0   1   1   1   1   0   0   0   0   0   0   0   0   1
+    ##   X56 X57 X58 X59 X60 X61 X62 X63 X64 X65 X66 X67 X68 X69 X70 X71 X72 X73
+    ## 1   0   0   0   0   0   1   1   0   0   0   1   1   0   1   1   0   1   1
+    ## 2   1   1   0   1   0   0   1   1   1   0   1   0   0   0   1   0   0   1
+    ## 3   1   1   1   1   0   1   1   0   1   0   0   0   1   0   0   1   0   1
+    ##   X74 X75 X76 X77 X78 X79 X80 X81 X82 X83 X84 X85 X86 X87 X88 X89 X90 X91
+    ## 1   1   1   1   1   0   0   1   0   1   1   0   1   1   0   1   0   0   1
+    ## 2   1   0   0   0   1   1   0   0   0   1   1   0   0   0   1   1   1   1
+    ## 3   1   0   1   0   0   1   0   0   0   0   0   0   1   0   0   1   1   0
+    ##   X92 X93 X94 X95 X96 X97 X98 X99 X100 X101 X102 X103 X104 X105 X106 X107
+    ## 1   1   1   0   0   1   1   1   1    1    0    0    1    1    1    1    0
+    ## 2   1   1   0   1   0   0   0   1    1    0    1    0    0    0    0    1
+    ## 3   1   0   0   1   1   0   1   0    1    0    0    0    0    1    1    1
+    ##   X108 X109 X110 X111 X112
+    ## 1    1    1    0    0    1
+    ## 2    0    0    0    0    0
+    ## 3    0    1    0    1    1
+
+``` r
+dim(a)
+```
+
+    ## [1]   3 113
+
+``` r
+a=as.data.frame(a)
+```
 
 Maximum a Posteriori (MAP) Estimation
 -------------------------------------
@@ -131,7 +188,7 @@ plot(LL~p, ylab="Likelihood",main="Likelihood")
 plot(LP~p, ylab="Likelihood",main="Posterior (alpha=1000, beta=1000)")
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 ``` r
 LL.max=p[which.max(LL)]
@@ -171,7 +228,7 @@ plot(LL~p, ylab="Likelihood",main="Likelihood")
 plot(LP~p, ylab="Likelihood",main="Posterior (alpha=30, beta=30)")
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 ``` r
 LL.max=p[which.max(LL)]
@@ -199,8 +256,8 @@ LP.max
 
     ## [1] 0.6172249
 
-Linear Regression
------------------
+Ordinary Linear Regression
+--------------------------
 
 Linear regression is used to predict the value of an outcome variable (continuous) Y based on one or more variables X. The aim is to establish a linear relationship (a mathmatical formula) between the predictor variables and the response variable.
 *Y* = *β*<sub>0</sub> + *β*<sub>1</sub>*X*<sub>1</sub> + *β*<sub>2</sub>*X*<sub>2</sub> + *ϵ*
@@ -228,15 +285,15 @@ rr=lsfit(X,Y)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=2.6631
-    ## R-Square=0.1545
-    ## F-statistic (df=2, 97)=8.8643
-    ## p-value=3e-04
+    ## Residual Standard Error=2.7104
+    ## R-Square=0.2968
+    ## F-statistic (df=2, 97)=20.4701
+    ## p-value=0
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   0.8276  0.5969  1.3866   0.1687
-    ## X1          0.0133  0.0504  0.2645   0.7919
-    ## X2          0.2851  0.0677  4.2084   0.0001
+    ## Intercept   1.1104  0.6962  1.5948   0.1140
+    ## X1          0.0649  0.0624  1.0405   0.3007
+    ## X2          0.4240  0.0664  6.3833   0.0000
 
 ``` r
 ## quadratic regression
@@ -247,15 +304,15 @@ rr=lsfit(X,Y2)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=2.7654
-    ## R-Square=0.9934
-    ## F-statistic (df=2, 97)=7298.914
+    ## Residual Standard Error=2.5857
+    ## R-Square=0.9924
+    ## F-statistic (df=2, 97)=6354.503
     ## p-value=0
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   1.7380  0.7991  2.1749   0.0321
-    ## X1         -0.2679  0.1610 -1.6638   0.0994
-    ## X3          0.3156  0.0078 40.6355   0.0000
+    ## Intercept   0.4274  1.0400  0.4110   0.6820
+    ## X1          0.0956  0.1984  0.4821   0.6308
+    ## X3          0.2971  0.0092 32.4603   0.0000
 
 Method 2: lm function in R (you don't need to combine X1 and X2)
 
@@ -270,131 +327,125 @@ summary(fit)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -6.4195 -1.7700 -0.0709  1.8400  5.0961 
+    ## -7.5524 -2.0715 -0.2669  1.7833  6.3085 
     ## 
     ## Coefficients:
     ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)  0.82760    0.59685   1.387    0.169    
-    ## X1           0.01332    0.05036   0.265    0.792    
-    ## X2           0.28508    0.06774   4.208 5.74e-05 ***
+    ## (Intercept)  1.11038    0.69623   1.595    0.114    
+    ## X1           0.06493    0.06240   1.040    0.301    
+    ## X2           0.42402    0.06643   6.383 5.96e-09 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 2.663 on 97 degrees of freedom
-    ## Multiple R-squared:  0.1545, Adjusted R-squared:  0.1371 
-    ## F-statistic: 8.864 on 2 and 97 DF,  p-value: 0.0002913
+    ## Residual standard error: 2.71 on 97 degrees of freedom
+    ## Multiple R-squared:  0.2968, Adjusted R-squared:  0.2823 
+    ## F-statistic: 20.47 on 2 and 97 DF,  p-value: 3.832e-08
 
 ``` r
 rr=lsfit(X,Y)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=2.861
-    ## R-Square=0.0242
-    ## F-statistic (df=2, 97)=1.2029
-    ## p-value=0.3048
+    ## Residual Standard Error=3.2281
+    ## R-Square=0.0026
+    ## F-statistic (df=2, 97)=0.1243
+    ## p-value=0.8833
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   1.0564  0.8267  1.2778   0.2044
-    ## X1         -0.2504  0.1666 -1.5030   0.1361
-    ## X3          0.0124  0.0080  1.5461   0.1253
+    ## Intercept   0.7820  1.2984  0.6022   0.5484
+    ## X1          0.0527  0.2477  0.2126   0.8321
+    ## X3         -0.0038  0.0114 -0.3351   0.7383
 
 ``` r
 fit$coefficients
 ```
 
     ## (Intercept)          X1          X2 
-    ##  0.82760142  0.01332246  0.28507984
+    ##  1.11038061  0.06492612  0.42402272
 
 ``` r
 fit$fitted.values
 ```
 
     ##            1            2            3            4            5 
-    ## -0.020267535  0.330257196 -0.005981663 -0.840783905 -0.546879687 
+    ##  0.675939000 -1.218431892  0.630026561  2.637190290  1.665659875 
     ##            6            7            8            9           10 
-    ##  0.112866080  1.127121104  0.295464007  0.296731416  0.394665409 
+    ## -0.660759198  2.219068374  0.865326162  1.372706891  1.557933969 
     ##           11           12           13           14           15 
-    ##  0.070348110 -1.817340579  1.278478165 -0.143623832 -0.308462740 
+    ##  0.472073831  5.266000396  1.035851982 -0.602412758  1.702279136 
     ##           16           17           18           19           20 
-    ## -0.834446982  0.164418935 -0.050498299  0.221401722 -2.629158974 
+    ##  4.731268342  1.353433380  0.863510252  1.337789747 -0.006479785 
     ##           21           22           23           24           25 
-    ## -0.909815271 -0.257053802 -1.622895100  0.318016936 -0.173081647 
+    ## -0.722341226 -1.749298996  2.369887159 -0.372951316  1.296716791 
     ##           26           27           28           29           30 
-    ##  2.817524266  1.158443673  0.726554833  2.051738983 -1.208066882 
+    ## -0.779464667  0.282471433 -0.353433908  0.273445625 -0.756325353 
     ##           31           32           33           34           35 
-    ##  0.232901922  0.482001650 -0.381504899  0.053550850 -0.553346110 
+    ##  0.897222364 -0.528437879 -1.346944795  2.030968300  2.503966491 
     ##           36           37           38           39           40 
-    ## -0.070375401  1.923809863 -0.085501960  2.280230300  1.885068689 
+    ##  1.385708358 -2.204867385  0.201494544 -3.650773117  1.495890144 
     ##           41           42           43           44           45 
-    ##  1.852793997 -2.145750148 -1.034006041 -0.837950269  0.473230794 
+    ## -2.428036810 -0.077329110 -1.227960891  0.247436037  0.176046530 
     ##           46           47           48           49           50 
-    ##  1.188932781 -1.218475631 -0.461351409 -0.298574257 -1.352671833 
+    ##  3.786718224  0.205028798  4.032430209 -0.246740548  1.052999484 
     ##           51           52           53           54           55 
-    ##  1.974411330  0.248088061 -0.152710080  1.253359820  2.855897238 
+    ##  0.230861249  2.861204914  3.087686041  1.667373882  0.634836596 
     ##           56           57           58           59           60 
-    ## -0.274824782  1.029717173  0.908236398  1.972237483  1.214391648 
+    ##  0.520180673 -0.013389458 -0.359357935 -2.886798372  1.904823535 
     ##           61           62           63           64           65 
-    ## -0.371743325  0.863179080  0.443284182 -0.634852739 -0.668130675 
+    ## -1.692195712 -0.892727392 -2.441439932 -0.037325462  3.902807962 
     ##           66           67           68           69           70 
-    ##  1.622458637  0.007999123  0.226402126  0.279484323  0.842497134 
+    ##  0.997728468 -0.766240689  0.338084925  0.791105909  2.763943738 
     ##           71           72           73           74           75 
-    ## -0.238508390 -1.613746979 -0.237816229  0.243464155 -0.522689792 
+    ##  0.979640683  3.159115829  3.016844899  1.111728195  2.463801315 
     ##           76           77           78           79           80 
-    ## -1.812646971 -1.779259199  0.742580697 -0.738415732  0.197099428 
+    ##  1.819822709  0.996404569  4.446262836  3.373110252 -0.780151474 
     ##           81           82           83           84           85 
-    ##  0.629650457  0.888209045 -1.870932026 -0.471798295 -1.065823280 
+    ##  1.636995263  3.633597443  2.583664913 -2.122656658  0.884929541 
     ##           86           87           88           89           90 
-    ##  0.204973761 -0.021303406 -0.523238581 -0.007755391  0.047922420 
+    ##  0.168248751  0.129256607  2.954204474  0.726279813 -0.242500076 
     ##           91           92           93           94           95 
-    ## -0.629046015 -1.487939884  1.670161676  1.826493928  2.449756932 
+    ## -2.010474431  0.011159729  3.599128843  1.079299401  2.239993112 
     ##           96           97           98           99          100 
-    ## -1.099893052  1.233285420  0.617454196  1.847935385  0.527921707
+    ##  0.917166356  2.574870300  0.861092187 -0.168130373  1.131609614
 
 ``` r
 fit$residuals
 ```
 
-    ##            1            2            3            4            5 
-    ## -4.857908514 -1.882323415  1.547277625 -1.234414830 -1.125401670 
-    ##            6            7            8            9           10 
-    ##  1.068239692 -3.696430813  2.264661041 -0.185153924  2.003082706 
-    ##           11           12           13           14           15 
-    ## -1.483266451 -2.655215617  4.997542180 -1.879513622  1.439758051 
-    ##           16           17           18           19           20 
-    ## -0.055506030  3.766437293  0.485269722 -0.349873568 -2.681227733 
-    ##           21           22           23           24           25 
-    ## -0.476717372 -3.106622214 -2.502041237 -2.717781582  1.090428921 
-    ##           26           27           28           29           30 
-    ##  0.859449296 -1.204235950 -1.393542713 -6.419489575  3.965602372 
-    ##           31           32           33           34           35 
-    ##  2.142220795  1.785601165  0.006764883 -3.946864472  1.538517863 
-    ##           36           37           38           39           40 
-    ##  0.472326650  0.199020562  1.312067257  1.532978892 -0.086365982 
-    ##           41           42           43           44           45 
-    ## -1.183909331  0.677190085  1.101751802  5.008689566  2.887746436 
-    ##           46           47           48           49           50 
-    ## -3.808226127 -0.425788760 -6.301072551  4.965040121  2.856863305 
-    ##           51           52           53           54           55 
-    ## -0.873594625 -3.453810283  0.454563633 -2.427591544  2.619956698 
-    ##           56           57           58           59           60 
-    ##  4.649040205 -1.266955696 -1.038493652 -1.413434492  3.904666034 
-    ##           61           62           63           64           65 
-    ## -0.954321092 -2.542974163  0.458073654  2.037926369  2.343771631 
-    ##           66           67           68           69           70 
-    ##  3.671280758 -1.578102456 -5.094546150  5.096112130 -2.437656064 
-    ##           71           72           73           74           75 
-    ##  2.525928233  0.629030680 -2.691183291  0.794415384  0.201905530 
-    ##           76           77           78           79           80 
-    ## -2.114805832  5.031102694  2.690137328  2.267918785  1.624361981 
-    ##           81           82           83           84           85 
-    ## -0.549540350 -1.733459889 -3.411266629 -1.471610425  1.230201190 
-    ##           86           87           88           89           90 
-    ## -0.523149464 -1.447457494  2.743855114 -0.124977302  0.726204090 
-    ##           91           92           93           94           95 
-    ##  0.778386499 -1.693367524  3.766779794 -2.415384605  4.015162081 
-    ##           96           97           98           99          100 
-    ## -1.479480287  3.460840907 -3.667172987 -3.366211900 -2.266707438
+    ##          1          2          3          4          5          6 
+    ## -0.1227163  2.2105757 -0.3668267 -2.0707059 -2.5771797  4.7762153 
+    ##          7          8          9         10         11         12 
+    ##  1.1290842 -0.8611271 -2.3999196  1.5330244  1.2765874 -1.1861641 
+    ##         13         14         15         16         17         18 
+    ##  1.8968649  5.4782977  5.9334310  2.9929938  1.9372422 -2.0740660 
+    ##         19         20         21         22         23         24 
+    ## -0.6654859  1.8814830  2.1009534  0.8830376  2.6886955  0.7472612 
+    ##         25         26         27         28         29         30 
+    ## -4.1143561 -2.0302047 -0.1669608 -3.1223606 -1.1038898 -2.3915177 
+    ##         31         32         33         34         35         36 
+    ## -7.5524002 -2.2607620  0.7590359 -3.0208028  6.3085012  1.7291649 
+    ##         37         38         39         40         41         42 
+    ## -0.8885444 -1.9755237  0.7399349 -3.0360516 -0.8128978  3.7847215 
+    ##         43         44         45         46         47         48 
+    ## -3.3627290  5.9891374  2.3219513 -3.0613489  0.8173157 -1.3899545 
+    ##         49         50         51         52         53         54 
+    ##  2.5002218  0.0739791 -2.8318932 -0.9127084 -2.1761638  3.9830984 
+    ##         55         56         57         58         59         60 
+    ## -1.1164758 -1.1274848  1.5536022 -1.7241155 -3.4627406 -1.1081483 
+    ##         61         62         63         64         65         66 
+    ## -0.6475314 -4.0991172  0.1625953  1.4425727 -1.3644095  2.1194403 
+    ##         67         68         69         70         71         72 
+    ##  0.8503586  1.3782278  1.6023139  0.9394864  1.9071155  4.8362930 
+    ##         73         74         75         76         77         78 
+    ## -3.8600115 -1.2167093 -3.0396970 -3.3928540  0.2617827 -0.5144449 
+    ##         79         80         81         82         83         84 
+    ## -3.6181306 -2.1783475  1.3472899  5.3773622 -1.1120397  1.9445107 
+    ##         85         86         87         88         89         90 
+    ## -2.2896053  1.4328731 -0.7674490  2.8694063 -2.4497877  0.8689489 
+    ##         91         92         93         94         95         96 
+    ##  0.4164216  2.3252374  2.6945473  1.7505347 -1.4643661  5.0741099 
+    ##         97         98         99        100 
+    ## -2.5324201 -5.2717330 -1.6874814 -1.0474785
 
 ``` r
 anova(fit)
@@ -404,9 +455,9 @@ anova(fit)
     ## 
     ## Response: Y
     ##           Df Sum Sq Mean Sq F value    Pr(>F)    
-    ## X1         1   0.12   0.125  0.0176    0.8947    
-    ## X2         1 125.61 125.610 17.7110 5.745e-05 ***
-    ## Residuals 97 687.94   7.092                      
+    ## X1         1   1.42   1.420  0.1934    0.6611    
+    ## X2         1 299.34 299.344 40.7468 5.957e-09 ***
+    ## Residuals 97 712.60   7.346                      
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -414,7 +465,105 @@ anova(fit)
 plot(fit$residuals~fit$fitted.values)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-7-1.png)
+
+#### Example: quantitative trait loci analysis for cholesterol levels
+
+We are given the genotype and phenotype data from 334 mouse individuals. The genotype data measure binary genotype values of 1333 genetic markers for each mouse, and the phenotype data measure the normalized blood cholesterol levels. Given these data, we want to find the quantitative trait loci (QTLs) that contribute to elevated cholesterol level.
+
+``` r
+pheno=read.table("phenotype.txt", header=T)
+geno=read.table("genotype.txt", header=T)
+pheno=pheno[,-1]
+Y=t(pheno)
+colnames(Y)="chol"
+dim(pheno) ## sample size: 334
+```
+
+    ## [1]   1 334
+
+``` r
+## we need reshape the geno data in the similar fashion as pheno.
+X=geno[,-1]
+names=geno[,1]
+X=as.data.frame(t(X))
+colnames(X)=names
+dim(X) ## 334 samples,1333 loci
+```
+
+    ## [1]  334 1333
+
+Let's do simple linear regression for each genetic marker and compute the SSE (sum of squared error) for each marker. Find out which marker has the minimum SSE. Remember, residual means the difference between the fitted value and the true value.
+
+``` r
+sse=vector()
+r.sq=vector()
+for(i in 1:ncol(X)){
+  lm=lm(Y~X[,i])
+  sse[i]=sum((lm$residuals)^2)
+  r.sq[i]=summary(lm)$r.squared
+}
+length(sse)
+```
+
+    ## [1] 1333
+
+``` r
+length(r.sq)
+```
+
+    ## [1] 1333
+
+``` r
+which.min(sse)
+```
+
+    ## [1] 847
+
+``` r
+which.max(sse)
+```
+
+    ## [1] 598
+
+``` r
+which.min(r.sq)
+```
+
+    ## [1] 598
+
+``` r
+which.max(r.sq)
+```
+
+    ## [1] 847
+
+``` r
+max(r.sq)
+```
+
+    ## [1] 0.1239932
+
+``` r
+plot(r.sq)
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-9-1.png)
+
+``` r
+lm.598=lm(Y~X[,598])
+lm.847=lm(Y~X[,847])
+
+par(mfrow=c(1,2))
+plot(Y~X[,598], main="Marker 598")
+abline(lm.598)
+plot(Y~X[,847], main="Marker 847")
+abline(lm.847)
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-9-2.png)
+
+It turns out Marker 847 has the minimum SSE, Marker 598 has the maximum SSE. It is confirmed by *R*<sup>2</sup>. Marker 847 has the maximum *R*<sup>2</sup>, whereas Marker 598 has the minimum *R*<sup>2</sup>.
 
 Model selection and cross validation
 ------------------------------------
@@ -481,7 +630,7 @@ We want to find *λ* to give the smallest GCV. If you couldn't get a "well" curv
 plot(seq(0,20,1),ridge$GCV)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ``` r
 which.min(ridge$GCV)
@@ -520,11 +669,11 @@ colSums((ridge$coef)^2)
 plot(seq(0,20,1),colSums((ridge$coef)^2))
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 L2 regularization term decreases as lambda value increases.
 
-### Insulin example
+### Example: Insulin
 
 ``` r
 a <- read.table(header = T, file="http://www.cs.washington.edu/homes/suinlee/genome560/data/mice.txt")  
@@ -537,14 +686,14 @@ all=cbind(X,Y)
 pairs(all) ## pairwise correlation
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
 ``` r
 ridge_lm=lm.ridge(Y~X,lambda=seq(0,20,1))
 plot(seq(0,20,1),ridge_lm$GCV)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 ``` r
 which.min(ridge_lm$GCV)
@@ -559,3 +708,71 @@ ridge_lm$coef[,10]
 
     ##        Xsex   Xweight_g  Xlength_cm     XTrigly XTotal_Chol        XFFA 
     ## -0.11701872  0.23404427  0.01042570  0.03482851  0.03578169  0.07695456
+
+### Example: Cholesterol
+
+Use the same data as above: quantitative trait loci analysis for cholesterol levels, use *R*<sup>2</sup> (coefficient of determination) to compare the ridge regression and the ordinary linear regression.
+
+$$
+R^2=1-\\frac{SSE}{SST}
+$$
+ SSE is the sum of squared error, whereas SST is the total sum of squares
+$$
+SSE=\\sum\_{i=1}^{n}(y\_i-\\hat{y\_i})^2
+$$
+$$
+SST=\\sum\_{i=1}^{n}(y\_i-\\bar{y})^2
+$$
+ Note that $\\bar{y}$ is the mean of the observed data.
+
+``` r
+pheno=read.table("phenotype.txt", header=T)
+geno=read.table("genotype.txt", header=T)
+pheno=pheno[,-1]
+Y=t(pheno)
+colnames(Y)="chol"
+
+X=geno[,-1]
+names=geno[,1]
+X=as.data.frame(t(X))
+colnames(X)=names
+X=as.matrix(X)
+library(MASS)
+lambdas=10^seq(-6,6,0.1)
+length(lambdas)
+```
+
+    ## [1] 121
+
+``` r
+ridge_chol=lm.ridge(Y~X, lambda=lambdas) ##lm.ridge require X to be a matrix. 
+select(ridge_chol)
+```
+
+    ## modified HKB estimator is -9.0968e-27 
+    ## modified L-W estimator is -259.5528 
+    ## smallest value of GCV  at 3162.278
+
+``` r
+lambda.best=which.min(ridge_chol$GCV)
+lambda.best
+```
+
+    ## 3.162278e+03 
+    ##           96
+
+``` r
+chol.best=lm.ridge(Y~X,lambda=lambda.best)
+
+## get fitted values for lm.rige
+## Note: there is indeed no predict method for ridgelm object. You will have to do it by hands. 
+y.pred=as.matrix(cbind(const=1,X)) %*% coef(chol.best)
+SSE=sum((Y-y.pred)^2)
+SST=sum((Y-chol.best$ym)^2)
+r.ridge=1-(SSE/SST)
+r.ridge
+```
+
+    ## [1] 0.7972105
+
+When we used only one marker and did single linear regression, Marker 847 gave us the maximum *R*<sup>2</sup> of 0.124. With ridge regression, we got *R*<sup>2</sup> of 0.797. Much better!
