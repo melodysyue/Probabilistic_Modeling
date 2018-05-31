@@ -12,6 +12,8 @@ Yue Shi, Ph.D candidate, University of Washington
 -   [Ordinary Linear Regression](#ordinary-linear-regression)
     -   [Example: Simulation data](#example-simulation-data)
     -   [Example: Quantitative trait loci analysis for cholesterol levels](#example-quantitative-trait-loci-analysis-for-cholesterol-levels)
+-   [Logistic regression](#logistic-regression)
+    -   [Example: Probability of admission](#example-probability-of-admission)
 -   [Model selection and cross validation](#model-selection-and-cross-validation)
     -   [Ridge regression or L2 regularized linear regression](#ridge-regression-or-l2-regularized-linear-regression)
     -   [LASSO regression or L1 regularized linear regression](#lasso-regression-or-l1-regularized-linear-regression)
@@ -19,6 +21,7 @@ Yue Shi, Ph.D candidate, University of Washington
     -   [Example: Simulation data](#example-simulation-data-1)
     -   [Example: Insulin](#example-insulin)
     -   [Example: Quantitative trait loci analysis for cholesterol levels](#example-quantitative-trait-loci-analysis-for-cholesterol-levels-1)
+    -   [Example: Prostate cancer](#example-prostate-cancer)
 
 Maximum Likelihood Estimation (MLE)
 -----------------------------------
@@ -326,15 +329,15 @@ rr=lsfit(X,Y)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=3.3336
-    ## R-Square=0.0666
-    ## F-statistic (df=2, 97)=3.4617
-    ## p-value=0.0353
+    ## Residual Standard Error=3.1703
+    ## R-Square=0.0695
+    ## F-statistic (df=2, 97)=3.6224
+    ## p-value=0.0304
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   0.9166  0.7917  1.1579   0.2498
-    ## X1          0.0367  0.0637  0.5753   0.5664
-    ## X2          0.2354  0.0952  2.4717   0.0152
+    ## Intercept   1.4152  0.7757  1.8244   0.0712
+    ## X1         -0.0134  0.0675 -0.1985   0.8431
+    ## X2          0.2082  0.0778  2.6740   0.0088
 
 ``` r
 ## quadratic regression
@@ -345,15 +348,15 @@ rr=lsfit(X,Y2)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=2.8559
-    ## R-Square=0.9922
-    ## F-statistic (df=2, 97)=6199.85
+    ## Residual Standard Error=2.9134
+    ## R-Square=0.9904
+    ## F-statistic (df=2, 97)=5024.191
     ## p-value=0
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept  -0.9356  0.7413 -1.2621   0.2099
-    ## X1          0.4262  0.1475  2.8890   0.0048
-    ## X3          0.2815  0.0074 38.1632   0.0000
+    ## Intercept   2.1079  1.1191  1.8835   0.0626
+    ## X1         -0.0816  0.2339 -0.3491   0.7278
+    ## X3          0.3015  0.0112 26.9033   0.0000
 
 Method 2: lm function in R (you don't need to combine X1 and X2)
 
@@ -368,119 +371,119 @@ summary(fit)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -7.3919 -2.3530 -0.1108  2.1422  9.8036 
+    ## -8.2611 -1.7342 -0.2275  1.6679  7.8275 
     ## 
     ## Coefficients:
-    ##             Estimate Std. Error t value Pr(>|t|)  
-    ## (Intercept)  0.91663    0.79166   1.158   0.2498  
-    ## X1           0.03667    0.06373   0.575   0.5664  
-    ## X2           0.23540    0.09524   2.472   0.0152 *
+    ##             Estimate Std. Error t value Pr(>|t|)   
+    ## (Intercept)  1.41521    0.77573   1.824   0.0712 . 
+    ## X1          -0.01340    0.06751  -0.198   0.8431   
+    ## X2           0.20815    0.07784   2.674   0.0088 **
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 3.334 on 97 degrees of freedom
-    ## Multiple R-squared:  0.06662,    Adjusted R-squared:  0.04738 
-    ## F-statistic: 3.462 on 2 and 97 DF,  p-value: 0.0353
+    ## Residual standard error: 3.17 on 97 degrees of freedom
+    ## Multiple R-squared:  0.0695, Adjusted R-squared:  0.05031 
+    ## F-statistic: 3.622 on 2 and 97 DF,  p-value: 0.03039
 
 ``` r
 rr=lsfit(X,Y)
 ls.print(rr)
 ```
 
-    ## Residual Standard Error=3.4368
-    ## R-Square=0.0079
-    ## F-statistic (df=2, 97)=0.3886
-    ## p-value=0.6791
+    ## Residual Standard Error=3.2841
+    ## R-Square=0.0015
+    ## F-statistic (df=2, 97)=0.0731
+    ## p-value=0.9296
     ## 
     ##           Estimate Std.Err t-value Pr(>|t|)
-    ## Intercept   0.0751  0.8921  0.0842   0.9331
-    ## X1          0.0396  0.1775  0.2233   0.8238
-    ## X3          0.0009  0.0089  0.1053   0.9164
+    ## Intercept   0.5787  1.2615  0.4587   0.6475
+    ## X1          0.0404  0.2636  0.1531   0.8786
+    ## X3         -0.0030  0.0126 -0.2405   0.8105
 
 ``` r
 fit$coefficients
 ```
 
     ## (Intercept)          X1          X2 
-    ##  0.91663042  0.03666502  0.23539968
+    ##  1.41521420 -0.01339771  0.20815063
 
 ``` r
 fit$fitted.values
 ```
 
     ##           1           2           3           4           5           6 
-    ##  1.26495013  0.90195210  0.42256720  0.18698568  0.49304931 -0.25142409 
+    ##  1.30553564  1.16023687 -0.08947948  1.51654120 -0.07873965  1.91418038 
     ##           7           8           9          10          11          12 
-    ## -0.74278546  1.96742340  1.00731161  0.85292673  2.11231410  1.24935545 
+    ##  1.72268051  1.01886303  1.07450762  0.44089727  0.02581148 -0.29050799 
     ##          13          14          15          16          17          18 
-    ## -0.15032920  1.63041596 -0.61918946  0.29757866  1.14665744  1.23174454 
+    ##  0.81088580  2.12683769  0.08418170  1.50010527 -0.17472938  0.23322615 
     ##          19          20          21          22          23          24 
-    ##  0.76982652  1.03443024  1.12752795  0.55972635  0.58471770  0.18794209 
+    ## -0.91813183 -0.54973632 -0.52799892  0.05631037  0.39388312  1.76486788 
     ##          25          26          27          28          29          30 
-    ## -1.69660663 -0.28392760 -0.10794345  1.37890032  4.01022380  0.99517216 
+    ## -0.32222663  0.40320167 -0.19819361  1.11675084  1.20266625  0.49730140 
     ##          31          32          33          34          35          36 
-    ## -0.27306775  2.37011949 -0.25358760  1.00810872  2.35344990 -1.03913954 
+    ##  0.49820652  0.60950864  1.10351390  0.18199793 -0.13696928  0.63841066 
     ##          37          38          39          40          41          42 
-    ##  0.54239653  0.02980176  1.07046928  0.94021113  1.26461318  0.16606094 
+    ##  0.96832391 -0.57125394  0.30111258  1.12275276  2.19577156 -0.61441515 
     ##          43          44          45          46          47          48 
-    ##  0.61571847 -0.73150781  0.74895191  0.74990018  0.49903903 -0.86259398 
+    ##  0.76392432  0.36737786 -0.56139503  0.34965453 -0.42658522 -0.74948767 
     ##          49          50          51          52          53          54 
-    ## -0.91687195  0.13310855  1.00435164  0.36952503  0.20274130  1.40241006 
+    ##  0.10232253  0.22893775 -0.26150315  1.73000856  1.54560698  1.89866501 
     ##          55          56          57          58          59          60 
-    ##  0.03051269  0.61205431  1.53763845 -0.85509012 -0.10505857 -0.26086770 
+    ##  0.90762356  1.59848388  1.46049350  2.24612033  0.01259383  0.56512344 
     ##          61          62          63          64          65          66 
-    ##  1.76665575  0.79577039  0.07723793  0.55249736  0.62375965  0.34171807 
+    ##  0.33336038  0.92100275  0.22247694  0.89046708 -0.65608552  0.08644721 
     ##          67          68          69          70          71          72 
-    ##  0.39897735  0.47465651  0.21835587 -0.87635706  0.60083188  0.41096659 
+    ##  0.30520816  0.32789886 -1.31212173  0.51842354  1.84186309  1.19390762 
     ##          73          74          75          76          77          78 
-    ##  0.77337071  0.23797333 -0.64487175 -0.72996292  2.30095935  0.58170567 
+    ##  0.56075206 -0.22535107  1.55784283 -0.20646345  0.03455207 -0.44807093 
     ##          79          80          81          82          83          84 
-    ##  1.48864694 -0.25648464 -0.12611828  0.70357001  0.48416786  1.78576734 
+    ##  1.44858170  1.72538498 -0.88767864  0.40393734  1.85558924 -0.46161631 
     ##          85          86          87          88          89          90 
-    ##  0.22460619  0.55708365  0.75367364  0.25237681  0.31757416  0.58317365 
+    ##  1.16859047 -0.06911211  0.56736532  0.56334905  1.37565883  0.42599257 
     ##          91          92          93          94          95          96 
-    ##  0.78385231  0.07829402  0.68657233  1.26474104  0.91041363  0.95927236 
+    ##  2.12620599  1.26992300  1.80832779  2.92690852  1.47049025  0.94363533 
     ##          97          98          99         100 
-    ##  1.92075038  2.48015836 -0.30969561  0.60862340
+    ## -0.40177256  0.71872416  0.27459577  0.72167487
 
 ``` r
 fit$residuals
 ```
 
     ##           1           2           3           4           5           6 
-    ## -1.20187869 -2.03209676 -2.66740099 -1.35604953 -1.35306602 -0.26023570 
+    ## -3.94060126  3.40928089 -2.67782214  4.73936481 -1.97280259  1.80222820 
     ##           7           8           9          10          11          12 
-    ## -5.37578373  0.44211866  1.77724601 -3.25234362  1.62349192 -1.76140213 
+    ## -4.50389364 -3.02051373 -0.01339654  6.33773180  1.04094596  2.10946237 
     ##          13          14          15          16          17          18 
-    ##  4.65364689 -0.47462591  2.13487721  0.05600408  0.45179658 -1.64387878 
+    ##  0.97162750 -0.91948540 -0.69449391  0.83283158 -1.50022949 -0.75183156 
     ##          19          20          21          22          23          24 
-    ## -4.54749656 -0.07663761 -1.11023293 -3.07183179 -0.40225885  5.96662918 
+    ##  0.82010405  2.32491076 -3.62332563 -2.22216198 -3.85985143 -1.36759427 
     ##          25          26          27          28          29          30 
-    ##  9.80360189  6.04229016 -3.12600106  3.32749808  0.09178299  0.72369162 
+    ##  0.63795276 -2.38348977  3.46941620  3.58270999 -4.43234659  0.02754703 
     ##          31          32          33          34          35          36 
-    ## -4.66042026 -0.28951334 -0.11446109 -3.49591144 -3.25101039 -0.50339772 
+    ## -1.44628663  7.82754332 -0.69299500 -2.42730814 -0.35999297  3.46840897 
     ##          37          38          39          40          41          42 
-    ##  1.44295153 -1.06663531  0.57621563  2.82031386 -0.31425677  2.50066611 
+    ##  3.97985804  0.18490653 -1.92708675 -6.50706550  0.82179923 -0.38528476 
     ##          43          44          45          46          47          48 
-    ##  1.75253593 -0.85470092  4.93414663  0.93483391 -1.88457089 -2.41751964 
+    ## -0.78851512  3.65870478  4.40304405  1.62309783  1.24296297 -1.69311713 
     ##          49          50          51          52          53          54 
-    ##  0.24940187 -2.43367379  1.14895888 -5.17732037  2.35129668  4.49168772 
+    ##  1.00352143 -8.26113022 -3.92363058 -2.95659454  0.71315110 -0.17758038 
     ##          55          56          57          58          59          60 
-    ## -7.39189809 -6.14885173  3.27881055 -0.13429971  1.87971162  2.24963331 
+    ## -5.58683935  1.33683518  5.10884535 -1.85749664 -2.01942314 -0.13972097 
     ##          61          62          63          64          65          66 
-    ##  0.44669036  2.37124769 -2.79669568  0.74766100  3.30945146 -2.18415217 
+    ##  3.46050208  6.01757412  4.63859914 -5.53939240 -1.21145577  3.07520939 
     ##          67          68          69          70          71          72 
-    ##  4.69446722 -2.69693616 -4.03463802 -0.55629624  0.74384281 -3.28446404 
+    ## -6.88793968  5.32236578 -3.07290097  0.81632638 -1.41101906 -5.32652050 
     ##          73          74          75          76          77          78 
-    ## -4.99487717  5.23223763 -2.91194039 -2.33147650 -0.27747477  0.88505983 
+    ## -1.11999500  3.83896187  1.56899778 -1.07117304  0.56440938  3.75667270 
     ##          79          80          81          82          83          84 
-    ## -1.66972023  2.69481828 -3.42596586 -6.44324319 -0.10713705  6.00340793 
+    ## -1.60770821  5.03726943  2.69688755  0.68722960 -0.27750598 -1.33293513 
     ##          85          86          87          88          89          90 
-    ## -2.20014151  8.57456291 -2.94668562  0.01171600  5.78167624 -0.68718644 
+    ##  1.53205630  1.06364537  1.37198397 -4.54767246  0.12611780 -1.11787075 
     ##          91          92          93          94          95          96 
-    ##  3.43468896 -0.07020733  2.99225689  4.98231526 -6.35520754  1.40964997 
+    ##  5.10102492 -1.12807089 -0.53920822 -1.07550355  0.92142545 -1.39774062 
     ##          97          98          99         100 
-    ## -3.56871811  2.16426840  3.12800656  0.08096125
+    ## -1.18049002  4.19012604 -0.41081134 -3.97635634
 
 ``` r
 anova(fit)
@@ -489,10 +492,10 @@ anova(fit)
     ## Analysis of Variance Table
     ## 
     ## Response: Y
-    ##           Df  Sum Sq Mean Sq F value  Pr(>F)  
-    ## X1         1    9.05   9.048  0.8142 0.36911  
-    ## X2         1   67.89  67.891  6.1092 0.01519 *
-    ## Residuals 97 1077.95  11.113                  
+    ##           Df Sum Sq Mean Sq F value   Pr(>F)   
+    ## X1         1   0.95   0.952  0.0948 0.758880   
+    ## X2         1  71.86  71.864  7.1501 0.008797 **
+    ## Residuals 97 974.93  10.051                    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -600,6 +603,149 @@ abline(lm.847)
 
 It turns out Marker 847 has the minimum SSE, Marker 598 has the maximum SSE. It is confirmed by *R*<sup>2</sup>. Marker 847 has the maximum *R*<sup>2</sup>, whereas Marker 598 has the minimum *R*<sup>2</sup>.
 
+Logistic regression
+-------------------
+
+Logistic regression, also called a logit model, is used to model a dichotomous categorical outcome variables (binary). In the logit model, the log odds of the outcome is modeled as a linear combination of the predictor variables.
+
+#### Example: Probability of admission
+
+Example: A researcher is interested in how variables, such as GRE (Graduate Record Exam scores), GPA (grade point average) and prestige of the undergraduate institution, effect admission into graduate school. The response variable, admit/don’t admit, is a binary variable. A rank of 1 has the highest prestige, and rank of 4 has the lowest.
+
+``` r
+mydata <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+## view the first few rows of the data
+head(mydata)
+```
+
+    ##   admit gre  gpa rank
+    ## 1     0 380 3.61    3
+    ## 2     1 660 3.67    3
+    ## 3     1 800 4.00    1
+    ## 4     1 640 3.19    4
+    ## 5     0 520 2.93    4
+    ## 6     1 760 3.00    2
+
+``` r
+summary(mydata)
+```
+
+    ##      admit             gre             gpa             rank      
+    ##  Min.   :0.0000   Min.   :220.0   Min.   :2.260   Min.   :1.000  
+    ##  1st Qu.:0.0000   1st Qu.:520.0   1st Qu.:3.130   1st Qu.:2.000  
+    ##  Median :0.0000   Median :580.0   Median :3.395   Median :2.000  
+    ##  Mean   :0.3175   Mean   :587.7   Mean   :3.390   Mean   :2.485  
+    ##  3rd Qu.:1.0000   3rd Qu.:660.0   3rd Qu.:3.670   3rd Qu.:3.000  
+    ##  Max.   :1.0000   Max.   :800.0   Max.   :4.000   Max.   :4.000
+
+``` r
+xtabs(~admit+rank, data=mydata)
+```
+
+    ##      rank
+    ## admit  1  2  3  4
+    ##     0 28 97 93 55
+    ##     1 33 54 28 12
+
+``` r
+mylogit=glm(admit~gre+gpa+rank, data=mydata,family="binomial")
+summary(mylogit)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = admit ~ gre + gpa + rank, family = "binomial", 
+    ##     data = mydata)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.5802  -0.8848  -0.6382   1.1575   2.1732  
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -3.449548   1.132846  -3.045  0.00233 ** 
+    ## gre          0.002294   0.001092   2.101  0.03564 *  
+    ## gpa          0.777014   0.327484   2.373  0.01766 *  
+    ## rank        -0.560031   0.127137  -4.405 1.06e-05 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 499.98  on 399  degrees of freedom
+    ## Residual deviance: 459.44  on 396  degrees of freedom
+    ## AIC: 467.44
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+``` r
+confint(mylogit) ##get CIs using profiled log-likelihood
+```
+
+    ## Waiting for profiling to be done...
+
+    ##                     2.5 %       97.5 %
+    ## (Intercept) -5.7109591680 -1.260314066
+    ## gre          0.0001715446  0.004461385
+    ## gpa          0.1415710585  1.428341503
+    ## rank        -0.8149612229 -0.315479733
+
+``` r
+confint.default(mylogit) ##get CIs using standard errors
+```
+
+    ##                     2.5 %       97.5 %
+    ## (Intercept) -5.6698857745 -1.229211021
+    ## gre          0.0001539942  0.004433925
+    ## gpa          0.1351569663  1.418870181
+    ## rank        -0.8092153067 -0.310847467
+
+``` r
+mydata$rank=factor(mydata$rank)
+mylogit=glm(admit~gre+gpa+rank, data=mydata,family="binomial")
+summary(mylogit)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = admit ~ gre + gpa + rank, family = "binomial", 
+    ##     data = mydata)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.6268  -0.8662  -0.6388   1.1490   2.0790  
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error z value Pr(>|z|)    
+    ## (Intercept) -3.989979   1.139951  -3.500 0.000465 ***
+    ## gre          0.002264   0.001094   2.070 0.038465 *  
+    ## gpa          0.804038   0.331819   2.423 0.015388 *  
+    ## rank2       -0.675443   0.316490  -2.134 0.032829 *  
+    ## rank3       -1.340204   0.345306  -3.881 0.000104 ***
+    ## rank4       -1.551464   0.417832  -3.713 0.000205 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 499.98  on 399  degrees of freedom
+    ## Residual deviance: 458.52  on 394  degrees of freedom
+    ## AIC: 470.52
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+``` r
+newdata1 <- with(mydata, data.frame(gre = mean(gre), gpa = mean(gpa), rank = factor(1:4)))
+newdata1$rankP <- predict(mylogit, newdata = newdata1, type = "response")
+newdata1
+```
+
+    ##     gre    gpa rank     rankP
+    ## 1 587.7 3.3899    1 0.5166016
+    ## 2 587.7 3.3899    2 0.3522846
+    ## 3 587.7 3.3899    3 0.2186120
+    ## 4 587.7 3.3899    4 0.1846684
+
 Model selection and cross validation
 ------------------------------------
 
@@ -665,7 +811,7 @@ We want to find *λ* to give the smallest GCV. If you couldn't get a "well" curv
 plot(seq(0,20,1),ridge$GCV)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 ``` r
 which.min(ridge$GCV)
@@ -704,7 +850,7 @@ colSums((ridge$coef)^2)
 plot(seq(0,20,1),colSums((ridge$coef)^2))
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-17-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 L2 regularization term decreases as lambda value increases.
 
@@ -721,14 +867,14 @@ all=cbind(X,Y)
 pairs(all) ## pairwise correlation
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-18-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-19-1.png)
 
 ``` r
 ridge_lm=lm.ridge(Y~X,lambda=seq(0,20,1))
 plot(seq(0,20,1),ridge_lm$GCV)
 ```
 
-![](estimation_files/figure-markdown_github/unnamed-chunk-19-1.png)
+![](estimation_files/figure-markdown_github/unnamed-chunk-20-1.png)
 
 ``` r
 which.min(ridge_lm$GCV)
@@ -811,3 +957,306 @@ r.ridge
     ## [1] 0.7972105
 
 When we used only one marker and did single linear regression, Marker 847 gave us the maximum *R*<sup>2</sup> of 0.124. With ridge regression, we got *R*<sup>2</sup> of 0.797. Much better!
+
+### Example: Prostate cancer
+
+``` r
+library(ElemStatLearn) ## contains the dta
+data(prostate)
+head(prostate)
+```
+
+    ##       lcavol  lweight age      lbph svi       lcp gleason pgg45       lpsa
+    ## 1 -0.5798185 2.769459  50 -1.386294   0 -1.386294       6     0 -0.4307829
+    ## 2 -0.9942523 3.319626  58 -1.386294   0 -1.386294       6     0 -0.1625189
+    ## 3 -0.5108256 2.691243  74 -1.386294   0 -1.386294       7    20 -0.1625189
+    ## 4 -1.2039728 3.282789  58 -1.386294   0 -1.386294       6     0 -0.1625189
+    ## 5  0.7514161 3.432373  62 -1.386294   0 -1.386294       6     0  0.3715636
+    ## 6 -1.0498221 3.228826  50 -1.386294   0 -1.386294       6     0  0.7654678
+    ##   train
+    ## 1  TRUE
+    ## 2  TRUE
+    ## 3  TRUE
+    ## 4  TRUE
+    ## 5  TRUE
+    ## 6  TRUE
+
+``` r
+str(prostate)
+```
+
+    ## 'data.frame':    97 obs. of  10 variables:
+    ##  $ lcavol : num  -0.58 -0.994 -0.511 -1.204 0.751 ...
+    ##  $ lweight: num  2.77 3.32 2.69 3.28 3.43 ...
+    ##  $ age    : int  50 58 74 58 62 50 64 58 47 63 ...
+    ##  $ lbph   : num  -1.39 -1.39 -1.39 -1.39 -1.39 ...
+    ##  $ svi    : int  0 0 0 0 0 0 0 0 0 0 ...
+    ##  $ lcp    : num  -1.39 -1.39 -1.39 -1.39 -1.39 ...
+    ##  $ gleason: int  6 6 7 6 6 6 6 6 6 6 ...
+    ##  $ pgg45  : int  0 0 20 0 0 0 0 0 0 0 ...
+    ##  $ lpsa   : num  -0.431 -0.163 -0.163 -0.163 0.372 ...
+    ##  $ train  : logi  TRUE TRUE TRUE TRUE TRUE TRUE ...
+
+``` r
+pairs(prostate)
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-22-1.png)
+
+``` r
+table(prostate$gleason) ## very few data points for 8 and 9
+```
+
+    ## 
+    ##  6  7  8  9 
+    ## 35 56  1  5
+
+``` r
+prostate$gleason=ifelse(prostate$gleason==6, 0 ,1) ## group 7,8,9 together
+table(prostate$gleason)
+```
+
+    ## 
+    ##  0  1 
+    ## 35 62
+
+``` r
+library(corrplot)
+```
+
+    ## corrplot 0.84 loaded
+
+``` r
+prostate.cor=cor(prostate)
+corrplot(prostate.cor)
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-22-2.png)
+
+``` r
+str(prostate)
+```
+
+    ## 'data.frame':    97 obs. of  10 variables:
+    ##  $ lcavol : num  -0.58 -0.994 -0.511 -1.204 0.751 ...
+    ##  $ lweight: num  2.77 3.32 2.69 3.28 3.43 ...
+    ##  $ age    : int  50 58 74 58 62 50 64 58 47 63 ...
+    ##  $ lbph   : num  -1.39 -1.39 -1.39 -1.39 -1.39 ...
+    ##  $ svi    : int  0 0 0 0 0 0 0 0 0 0 ...
+    ##  $ lcp    : num  -1.39 -1.39 -1.39 -1.39 -1.39 ...
+    ##  $ gleason: num  0 0 1 0 0 0 0 0 0 0 ...
+    ##  $ pgg45  : int  0 0 20 0 0 0 0 0 0 0 ...
+    ##  $ lpsa   : num  -0.431 -0.163 -0.163 -0.163 0.372 ...
+    ##  $ train  : logi  TRUE TRUE TRUE TRUE TRUE TRUE ...
+
+``` r
+train=subset(prostate,train==TRUE)[,1:9]
+str(train)
+```
+
+    ## 'data.frame':    67 obs. of  9 variables:
+    ##  $ lcavol : num  -0.58 -0.994 -0.511 -1.204 0.751 ...
+    ##  $ lweight: num  2.77 3.32 2.69 3.28 3.43 ...
+    ##  $ age    : int  50 58 74 58 62 50 58 65 63 63 ...
+    ##  $ lbph   : num  -1.39 -1.39 -1.39 -1.39 -1.39 ...
+    ##  $ svi    : int  0 0 0 0 0 0 0 0 0 0 ...
+    ##  $ lcp    : num  -1.39 -1.39 -1.39 -1.39 -1.39 ...
+    ##  $ gleason: num  0 0 1 0 0 0 0 0 0 1 ...
+    ##  $ pgg45  : int  0 0 20 0 0 0 0 0 0 30 ...
+    ##  $ lpsa   : num  -0.431 -0.163 -0.163 -0.163 0.372 ...
+
+``` r
+test=subset(prostate,train==FALSE)[,1:9]
+str(test)
+```
+
+    ## 'data.frame':    30 obs. of  9 variables:
+    ##  $ lcavol : num  0.737 -0.777 0.223 1.206 2.059 ...
+    ##  $ lweight: num  3.47 3.54 3.24 3.44 3.5 ...
+    ##  $ age    : int  64 47 63 57 60 69 68 67 65 54 ...
+    ##  $ lbph   : num  0.615 -1.386 -1.386 -1.386 1.475 ...
+    ##  $ svi    : int  0 0 0 0 0 0 0 0 0 0 ...
+    ##  $ lcp    : num  -1.386 -1.386 -1.386 -0.431 1.348 ...
+    ##  $ gleason: num  0 0 0 1 1 0 0 1 0 0 ...
+    ##  $ pgg45  : int  0 0 0 5 20 0 0 20 0 0 ...
+    ##  $ lpsa   : num  0.765 1.047 1.047 1.399 1.658 ...
+
+``` r
+table(prostate$train)
+```
+
+    ## 
+    ## FALSE  TRUE 
+    ##    30    67
+
+Model with OLS
+
+``` r
+library(leaps)
+subfit=regsubsets(lpsa~., data=train)
+sub.sum=summary(subfit)
+which.min(sub.sum$bic)
+```
+
+    ## [1] 3
+
+``` r
+plot(subfit, scale="bic") 
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-23-1.png)
+
+``` r
+## It shows lcavol, lweight and gleason are selected in the best 3-variable model, which gives the minimum BIC. 
+
+ols=lm(lpsa~lcavol+lweight+gleason,data=train)
+plot(ols$fitted.values, train$lpsa, xlab="prediction from train dataset",ylab="observation")
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-23-2.png)
+
+``` r
+pred=predict(ols,newdata=test)
+plot(pred, test$lpsa, xlab="Prediction from test dataset", ylab="observation")
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-23-3.png)
+
+``` r
+MSE.ols=mean((test$lpsa-pred)^2)
+MSE.ols
+```
+
+    ## [1] 0.5084126
+
+Model with Ridge regression
+
+``` r
+x.test=as.matrix(test[,1:8])
+y.test=test[,9]
+x=as.matrix(train[,1:8])
+y=train[,9]
+library(glmnet)
+```
+
+    ## Warning: package 'glmnet' was built under R version 3.4.4
+
+    ## Loading required package: Matrix
+
+    ## Loading required package: foreach
+
+    ## Loaded glmnet 2.0-16
+
+``` r
+ridge=cv.glmnet(x,y,alpha=0)
+ridge.bs.lambda=ridge$lambda.min
+ridge.best=glmnet(x,y,alpha=0, lambda=ridge.bs.lambda)
+pred.ridge=predict(ridge.best, newx=x.test)
+MSE.ridge=mean((y.test-pred.ridge)^2)
+MSE.ridge
+```
+
+    ## [1] 0.4785047
+
+Model with Lasso regression
+
+``` r
+lasso=cv.glmnet(x,y,alpha=1)
+lasso.bs.lambda=lasso$lambda.min
+lasso.best=glmnet(x,y,alpha=1, lambda=ridge.bs.lambda)
+pred.lasso=predict(lasso.best, newx=x.test)
+MSE.lasso=mean((y.test-pred.lasso)^2)
+MSE.lasso
+```
+
+    ## [1] 0.4446758
+
+Model with regression tree
+
+``` r
+set.seed(1)
+library(rpart)
+tree=rpart(lpsa~., data=train)
+library(partykit)
+```
+
+    ## Warning: package 'partykit' was built under R version 3.4.4
+
+    ## Loading required package: grid
+
+    ## Loading required package: libcoin
+
+    ## Loading required package: mvtnorm
+
+``` r
+plot(as.party(tree))
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-26-1.png)
+
+``` r
+pred.tree=predict(tree, newx=x.test)
+MSE.tree=mean((y.test-pred.tree)^2)
+```
+
+    ## Warning in y.test - pred.tree: longer object length is not a multiple of
+    ## shorter object length
+
+``` r
+MSE.tree
+```
+
+    ## [1] 1.854035
+
+Note: regression tree is very unstable and tends to overfit, since it loses the information from the continuous variable. Such instability can be solved with bagging method, which is basically a collection of decision tress, and take the average of the output from these trees.
+
+Model with random forest regression
+
+``` r
+library(randomForest)
+```
+
+    ## randomForest 4.6-12
+
+    ## Type rfNews() to see new features/changes/bug fixes.
+
+``` r
+set.seed(1)
+rf=randomForest(lpsa~.,data=train)
+plot(rf)
+```
+
+![](estimation_files/figure-markdown_github/unnamed-chunk-27-1.png)
+
+``` r
+which.min(rf$mse)
+```
+
+    ## [1] 82
+
+``` r
+rf.best=randomForest(lpsa~.,data=train, ntree=which.min(rf$mse))
+importance(rf.best)
+```
+
+    ##         IncNodePurity
+    ## lcavol      28.239422
+    ## lweight     16.504314
+    ## age          6.708906
+    ## lbph         6.312513
+    ## svi          7.873221
+    ## lcp          8.666698
+    ## gleason      4.965704
+    ## pgg45        7.991093
+
+``` r
+pred.rf=predict(rf.best,newdata=x.test)
+MSE.rf=mean((y.test-pred.rf)^2)
+MSE.rf
+```
+
+    ## [1] 0.5219353
+
+Note: A primary disadvantage of random forests is that the results are not easily interpretable: that is, if you would like to draw conclusions about the meaning of the classification model, random forests may not be the best choice.
+
+Difference between decision tree modeling and linear regression: Decision Tree and Linear Regression are both supervised learning algorithms. While decision tree is easy to interpret, linear regression is only good when relationships between variables are linear and also when you need to also find the marginal effect. When the data is not linear, you should choose decision tress and random forests.
